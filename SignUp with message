@@ -1,0 +1,89 @@
+1- First make new app in project = python manage.py startapp account
+2- make urls.py in account and write = from django.urls import path
+
+from . import views
+urlpatterns = [
+
+    path('register',views.register, name='register'),
+]
+3- goto the main project urls and write =  path('account/',include('account.urls')),
+    account is project name and account.urls means in account app go to urls
+4- make HTML code 
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+
+    <form action="register" method="post">
+      
+    {% csrf_token %}
+  <label>First name:</label>
+  <input type="text" name="first_name"><br><br>
+
+  <label>Last name:</label>
+  <input type="text"  name="last_name"><br><br>
+
+<label>User name:</label>
+  <input type="text"  name="username"><br><br>
+
+
+<label>Email:</label>
+  <input type="email" name="email"><br><br>
+
+<label>Password:</label>
+  <input type="password"  name="password"><br><br>
+
+<label>Conform Password:</label>
+  <input type="password"  name="conformpassword"><br><br>
+
+  <input type="submit" value="Submit">
+<br>
+<br>
+  {%for messages in messages%}
+  {{messages}}
+  {%endfor%}
+  <br>
+</form>
+
+
+</body>
+</html>
+
+5- goto views and write the code
+
+CODE IN VIEWS:
+from django.shortcuts import render,redirect
+from django.contrib.auth.models import User, auth
+from django.contrib import messages
+
+# Create your views here.
+
+def register(request):
+
+    if request.method == 'POST':
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        username = request.POST['username']
+        email = request.POST['email']
+        password = request.POST['password']
+        conformpassword = request.POST['conformpassword']
+        if password == conformpassword:
+            if User.objects.filter(username = username):
+                messages.info(request, 'Username Taken')
+                return redirect('register')
+            elif User.objects.filter(email = email):
+                messages.info(request,'Email has been taken')
+                return redirect('register')
+            else:
+                            
+                user = User.objects.create_user(username = username, first_name = first_name, last_name = last_name, email = email, password = password)
+                user.save();
+                print('User created')
+        else:
+            print('Not match')
+        
+        return redirect('/')
+    else:
+        return render (request,'register.html')
